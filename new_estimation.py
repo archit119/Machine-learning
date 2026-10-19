@@ -3,6 +3,8 @@ from streamlit_option_menu import option_menu
 
 import streamlit as st
 
+side_bar_title = st.sidebar.title("Input")
+
 genre_sidebar = st.sidebar.selectbox(
     
     "Genre",

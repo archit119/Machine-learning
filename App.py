@@ -21,21 +21,20 @@ release_month_sidebar = st.sidebar.slider(
     0,11
 )
 
-metacritic_sidebar = st.sidebar.slider(
-    "Metacritic Score",
-    0,100
+
+marketing_budget_sidebar=st.sidebar.number_input("Marketing Budget")
+
+price_sidebar=st.sidebar.number_input("Price at Launch")
+
+dev_time_sidebar = st.sidebar.slider(
+    "Dev Time in Month",
+    0,11
 )
 
-multiplayer_sidebar = st.sidebar.radio(
-        "Multiplayer",
-        ["Yes", "No"]
+is_franchise_sidebar = st.sidebar.radio(
+    "Is it a franchise",
+    [":green[Yes]",":red[No]"]
 )
 
-publisher_size_sidebar = st.sidebar.selectbox(
-    
-    "Publisher Size",
-    ("tiny", "small", "medium","large","giant")
-    
-)
 
 pg.run()

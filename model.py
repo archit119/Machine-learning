@@ -8,6 +8,10 @@ from sklearn.pipeline import make_pipeline
 import pandas as pd
 from sklearn.model_selection import cross_val_score, KFold
 from itertools import combinations
+import pprint
+from joblib import dump, load
+
+np.set_printoptions(legacy='1.25') 
 
 df = fe.getTable().copy()
 
@@ -23,13 +27,17 @@ df.drop(columns='dev_budget_usd', inplace=True)
 # df.drop(columns='launch_price_usd', inplace=True)
 # df.drop(columns='launch_discount', inplace=True)
 
-def splitData(X, y):
-    X_train, X_test, y_train, y_test = train_test_split(
-    X,y , random_state=104,test_size=0.2, shuffle=True)
+def splitData(X, y, fieldToDrop=None):
+    tempX = X.copy()
+    if(fieldToDrop != None):
+        tempX.drop(columns=fieldToDrop, inplace=True)
 
-    print(X_train.shape, X_test.shape) 
-    print(y_train.shape, y_test.shape)
-    print()
+    X_train, X_test, y_train, y_test = train_test_split(
+    tempX,y , random_state=104,test_size=0.2, shuffle=True)
+
+    # print(X_train.shape, X_test.shape) 
+    # print(y_train.shape, y_test.shape)
+    # print()
 
     return X_train, X_test, y_train, y_test
 
@@ -57,9 +65,10 @@ def kFoldTest(model, fieldToDrop=None):
     tempX = X.copy()
     if(fieldToDrop != None):
         tempX.drop(columns=fieldToDrop, inplace=True)
-        print("Model without ", fieldToDrop)
+        #print("Model without ", fieldToDrop)
     else:
-        print("Base Model")
+        pass
+        #print("Base Model")
 
     cv = KFold(n_splits=5, shuffle=True, random_state=0)
 
@@ -70,13 +79,13 @@ def kFoldTest(model, fieldToDrop=None):
     # low std means the model performs consistent across different splits
 
     # debugging
-    print('r2 values = ', scores)
-    print('r2 mean:', scores.mean())
-    print('r2 std: ', scores.std())
-    print('RMSE = ', rmse) 
-    print('RMSE mean:', rmse.mean())
-    print('RMSE std: ', rmse.std())                      
-    print() 
+    # print('r2 values = ', scores)
+    # print('r2 mean:', scores.mean())
+    # print('r2 std: ', scores.std())
+    # print('RMSE = ', rmse) 
+    # print('RMSE mean:', rmse.mean())
+    # print('RMSE std: ', rmse.std())                      
+    # print() 
 
     return scores, rmse
 
@@ -105,30 +114,26 @@ def CompareModels(baseModel, newModel):
     newModelRmse = newModel[1]
 
     # rmse values
-    print("RMSE:")
+    #print("RMSE:")
     rmse = baseRmse - newModelRmse
-    rmseMean = np.mean(rmse)
-    print(rmse)
-    print(rmseMean)
+    rmseMean = np.mean(rmse, dtype=float)
+    #print(rmse)
+    #print(rmseMean)
 
     # r2 values
-    print("R2: ")
+    #print("R2: ")
     r2 = baseScores - newModelScores
-    r2Mean = np.mean(r2)
-    print(r2)
-    print(r2Mean)
+    r2Mean = np.mean(r2, dtype=float)
+    #print(r2)
+    #print(r2Mean)
+
+    return rmseMean, r2Mean
 
 
 X = df.drop(columns='first_year_sales_k')
 y = np.log1p(df['first_year_sales_k']) # log transformed sales
 
 fieldsToDrop = ['is_multiplayer', 'team_size', 'platforms_count', 'publisher_size', 'dev_time_months', 'launch_price_usd', 'launch_discount']
-
-X_train, X_test, y_train, y_test = splitData(X, y)
-model = trainModel(X_train, y_train)
-
-# base model
-CompareModels(kFoldTest(model), kFoldTest(model, fieldsToDrop))
 
 # new idea: rather than manually removing and adding we use best subset selection
 # its a cool idea where i get all combinations of the array fieldsToDrop, pass that in and get all the rmse and r2 values
@@ -138,9 +143,59 @@ for i in range(len(fieldsToDrop) + 1):
 
 #fieldsToDropCombinations = np.array(fieldsToDropCombinations)
 fieldsToDropCombinations = [row for row in fieldsToDropCombinations if len(row) > 0]
-print(len(fieldsToDropCombinations))
+models = []
+for i in fieldsToDropCombinations:
+    X_train, X_test, y_train, y_test = splitData(X, y, list(i))
+    model = trainModel(X_train, y_train)
+    models.append(model)
+    print("Finished training model ", i)
+
+# base model
+# CompareModels(kFoldTest(models[0]), kFoldTest(model, fieldsToDrop))
+
+# print(len(fieldsToDropCombinations))
 #print(fieldsToDropCombinations)
 
-baseModel = kFoldTest(model)
+baseModel = kFoldTest(models[0])
+modelValuesRmse = {}
+modelValuesR2 = {}
+count = 0
 for i in fieldsToDropCombinations:
-    CompareModels(baseModel, kFoldTest(model, list(i)))
+    values = CompareModels(baseModel, kFoldTest(models[count], list(i)))
+    modelValuesRmse[i] = values[0]
+    modelValuesR2[i] = values[1]
+    count += 1
+
+# first get the minimum rmse model
+pprint.pp(modelValuesRmse)
+min_val = min(modelValuesRmse.values())
+res = [k for k, v in modelValuesRmse.items() if v == min_val]
+print(min_val)
+print(res)
+
+# now put this model in variable
+print("Base:")
+baseResult = kFoldTest(models[0])
+print(baseResult)
+baseRmseMean = np.mean(baseResult[0])
+print("Base model mean RMSE", baseRmseMean)
+
+baseR2Mean = np.mean(baseResult[1])
+print("Base model R2", baseR2Mean)
+
+print("Minimum:")
+key = res[0]
+print(key)
+minModel = models[fieldsToDropCombinations.index(key)]
+minResult = kFoldTest(minModel, list(key))
+print(minResult)
+minRmseeMean = np.mean(minResult[0])
+print("Minimum model mean RMSE", minRmseeMean)
+
+minR2Mean = np.mean(minResult[1])
+print("Minimum model R2", minR2Mean)
+
+dump(minModel[1], "game_model.joblib")
+dump(minModel[0], "scaler.joblib")
+
+print("Model and scaler saved successfully!")

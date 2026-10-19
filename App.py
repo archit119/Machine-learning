@@ -1,2 +1,10 @@
 import streamlit as st
-st.write("Hello World 1234")
+import featureEngineering
+
+sales_variation = st.Page("sales_variation.py", title="Sales Variation")
+new_estimation_page = st.Page("new_estimation.py", title="New Estrimation")
+past_games_page = st.Page("past_games.py", title="Past Games")
+
+pg = st.navigation([sales_variation,new_estimation_page, past_games_page],position="top")
+
+pg.run()

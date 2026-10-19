@@ -27,13 +27,9 @@ df.drop(columns='dev_budget_usd', inplace=True)
 # df.drop(columns='launch_price_usd', inplace=True)
 # df.drop(columns='launch_discount', inplace=True)
 
-def splitData(X, y, fieldToDrop=None):
-    tempX = X.copy()
-    if(fieldToDrop != None):
-        tempX.drop(columns=fieldToDrop, inplace=True)
-
+def splitData(X, y):
     X_train, X_test, y_train, y_test = train_test_split(
-    tempX,y , random_state=104,test_size=0.2, shuffle=True)
+    X, y , random_state=104,test_size=0.2, shuffle=True)
 
     # print(X_train.shape, X_test.shape) 
     # print(y_train.shape, y_test.shape)
@@ -137,18 +133,13 @@ fieldsToDrop = ['is_multiplayer', 'team_size', 'platforms_count', 'publisher_siz
 
 # new idea: rather than manually removing and adding we use best subset selection
 # its a cool idea where i get all combinations of the array fieldsToDrop, pass that in and get all the rmse and r2 values
-fieldsToDropCombinations = [] # all possible combinations
-for i in range(len(fieldsToDrop) + 1):
-    fieldsToDropCombinations.extend(combinations(fieldsToDrop, i))
+model = make_pipeline(StandardScaler(), LinearRegression()) # untrained model
 
-#fieldsToDropCombinations = np.array(fieldsToDropCombinations)
-fieldsToDropCombinations = [row for row in fieldsToDropCombinations if len(row) > 0]
-models = []
-for i in fieldsToDropCombinations:
-    X_train, X_test, y_train, y_test = splitData(X, y, list(i))
-    model = trainModel(X_train, y_train)
-    models.append(model)
-    print("Finished training model ", i)
+fieldsToDropCombinations = []
+for i in range(len(fieldsToDrop) + 1):
+    fieldsToDropCombinations.extend(combinations(fieldsToDrop, i)) 
+
+baseR2, baseRmse = kFoldTest(model) # get the base values
 
 # base model
 # CompareModels(kFoldTest(models[0]), kFoldTest(model, fieldsToDrop))
@@ -156,46 +147,51 @@ for i in fieldsToDropCombinations:
 # print(len(fieldsToDropCombinations))
 #print(fieldsToDropCombinations)
 
-baseModel = kFoldTest(models[0])
-modelValuesRmse = {}
-modelValuesR2 = {}
-count = 0
-for i in fieldsToDropCombinations:
-    values = CompareModels(baseModel, kFoldTest(models[count], list(i)))
-    modelValuesRmse[i] = values[0]
-    modelValuesR2[i] = values[1]
-    count += 1
+# baseModel = kFoldTest(model)
+# modelValuesRmse = {}
+# modelValuesR2 = {}
+# count = 0
 
-# first get the minimum rmse model
-pprint.pp(modelValuesRmse)
-min_val = min(modelValuesRmse.values())
-res = [k for k, v in modelValuesRmse.items() if v == min_val]
-print(min_val)
-print(res)
+# for i in fieldsToDropCombinations:
+#     values = CompareModels(baseModel, kFoldTest(model, list(i)))
+#     modelValuesRmse[i] = values[0]
+#     modelValuesR2[i] = values[1]
+#     count += 1
 
-# now put this model in variable
-print("Base:")
-baseResult = kFoldTest(models[0])
-print(baseResult)
-baseRmseMean = np.mean(baseResult[0])
-print("Base model mean RMSE", baseRmseMean)
+# here we train all combination models using the kfoldtest
+rows = []
+for combo in fieldsToDropCombinations:
+    r2, rmse = kFoldTest(model, list(combo))
+    rows.append({
+        'dropped': ', '.join(combo) if combo else '(none - base model)',
+        'n_dropped': len(combo),
+        'rmse_mean': rmse.mean(),
+        'r2_mean': r2.mean(),
+        'rmse_vs_base': (baseRmse - rmse).mean(),
+        'no_of_better_folds': int((rmse < baseRmse).sum())
+    })
 
-baseR2Mean = np.mean(baseResult[1])
-print("Base model R2", baseR2Mean)
+results = pd.DataFrame(rows).sort_values('rmse_mean').reset_index(drop=True)
 
-print("Minimum:")
-key = res[0]
-print(key)
-minModel = models[fieldsToDropCombinations.index(key)]
-minResult = kFoldTest(minModel, list(key))
-print(minResult)
-minRmseeMean = np.mean(minResult[0])
-print("Minimum model mean RMSE", minRmseeMean)
+# after we get the results we display them for debugging
+# we gotta display the rmse with the lowest rmse
+pd.set_option('display.width', 200)
+pd.set_option('display.max_colwidth', 90)
+print("Top 10 subsets (lowest RMSE first)")
+print(results.head(10).round(4).to_string())
 
-minR2Mean = np.mean(minResult[1])
-print("Minimum model R2", minR2Mean)
+# we now choose the subset with the lowest rmse
+best = results.iloc[0]
+chosenDrop = best['dropped'].split(',')
+chosenDrop = [item.strip() for item in chosenDrop] # strips the array of any spaces
+print(chosenDrop)
 
-dump(minModel[1], "game_model.joblib")
-dump(minModel[0], "scaler.joblib")
+Xfinal = X.drop(columns=chosenDrop)
+
+finalModel = make_pipeline(StandardScaler(), LinearRegression())
+finalModel.fit(Xfinal, y)
+
+dump(finalModel, "game_model_full.joblib")
+dump(Xfinal.columns, "required_inputs.joblib")
 
 print("Model and scaler saved successfully!")

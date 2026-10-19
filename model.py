@@ -58,6 +58,8 @@ def kFoldTest(model, fieldToDrop=None):
     if(fieldToDrop != None):
         tempX.drop(columns=fieldToDrop, inplace=True)
         print("Model without ", fieldToDrop)
+    else:
+        print("Base Model")
 
     cv = KFold(n_splits=5, shuffle=True, random_state=0)
 

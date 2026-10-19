@@ -1,12 +1,20 @@
 import streamlit as st
 import pandas as pd
-import featureEngineering
+from pandasql import sqldf
 st.title("Sales Variation")
 st.write("This page allows users to analize and inspect charts based on their chosen input values:")
 
 st.subheader("Average Sales by Platform")
 st.write("")
-st.bar_chart(featureEngineering.df_encoded)
+platform_df = query(f"""
+    SELECT platforms_count, AVG(first_year_sales_k) AS avg_sales
+    FROM final_copy_table
+    WHERE genre = '{genre}'
+    GROUP BY platforms_count
+    ORDER BY platforms_count
+""") 
+platform_df["platforms_count"] = platform_df["platforms_count"].astype(str)
+st.bar_chart(platform_df, x="platform_count", y="avg_sales")
 
 
 st.write("")

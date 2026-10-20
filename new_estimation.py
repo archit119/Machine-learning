@@ -54,7 +54,7 @@ with st.sidebar.form(key="sidebar form"):
     )
 
     new_launch_discount = st.slider(
-        "Launch Discount (%)", 0, 100, 
+        "Launch Discount (%)", 0, 60, 
     )
 
     submit_button = st.form_submit_button("Submit")

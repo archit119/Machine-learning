@@ -3,29 +3,36 @@ import featureEngineering
 
 
 side_bar_title = st.sidebar.title("Input")
+with st.sidebar.form(key="sidebar form"):
 
-genre = st.sidebar.selectbox(
-    
-    "Genre",
-    ("rpg", "shooter", "adventure","puzzle","strategy")
-    
-)
-release_month = st.sidebar.slider(
-    "Release Month",
-    0,11
-)
+    genre = st.selectbox(
+        
+        "Genre",
+        ("rpg", "shooter", "adventure","puzzle","strategy")
+        
+    )
+    release_month = st.slider(
+        "Release Month",
+        0,11
+    )
 
 
-marketing_budget = st.sidebar.number_input("Marketing Budget")
+    marketing_budget = st.number_input("Marketing Budget")
 
-price = st.sidebar.number_input("Price at Launch")
+    price = st.number_input("Price at Launch")
 
-dev_time = st.sidebar.slider(
-    "Dev Time in Month",
-    0,11
-)
+    dev_time = st.slider(
+        "Dev Time in Month",
+        0,11
+    )
 
-is_franchise = st.sidebar.radio(
-    "Is it a franchise",
-    [":green[Yes]",":red[No]"]
-)
+    is_franchise = st.radio(
+        "Is it a franchise",
+        [":green[Yes]",":red[No]"]
+    )
+
+    submit_button = st.form_submit_button("Submit")
+
+
+st.write("First Year Sales Prediction:")
+

@@ -193,9 +193,19 @@ finalDrop.append('dev_budget_usd') # we add it manually because technically i dr
 finalModel = make_pipeline(StandardScaler(), LinearRegression())
 finalModel.fit(Xfinal, y)
 
+# get the final stats
+foldR2, foldRmse = kFoldTest(model, chosenDrop)
+
+modelStats = {
+    'r2_mean': float(foldR2.mean()),
+    'rmse_mean': float(foldRmse.mean()),
+    'error_factor': float(np.exp(foldRmse.mean()))
+}
+
 dump(finalModel, "game_model_full.joblib")
 dump(Xfinal.columns, "required_inputs.joblib")
 dump(finalDrop, "final_drop.joblib")
 dump(Xfinal, "table_for_dist.joblib")
+dump(modelStats, "model_stats.joblib")
 
 print("Model and scaler saved successfully!")

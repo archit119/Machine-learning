@@ -3,6 +3,7 @@ import numpy as np
 import model_logic as ml
 import pandas as pd
 import random
+import altair as alt
 
 # stuff needed:
 # genre
@@ -32,7 +33,13 @@ def monthConverter(monthNumber):
     }
     return release_month_dict[monthNumber]
 
-    
+
+def differentMonths(new_genre, new_marketing_budget, new_team_size, new_platform_count, new_multiplayer, new_is_franchise, new_publisher_size, new_launch_discount):
+    monthSales = []
+    for i in range(12):
+        monthSales.append(ml.predict(new_genre, monthConverter(i), new_marketing_budget, new_team_size, new_platform_count, new_multiplayer, new_is_franchise, new_publisher_size, new_launch_discount))
+
+    return monthSales
 
 # ui stuff
 side_bar_title = st.sidebar.title("Game Details")
@@ -48,7 +55,7 @@ with st.sidebar.form(key="sidebar form"):
     new_release_month = st.selectbox(
         
         "Month",
-        ("January", "Febuary", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+        ("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
         
     )
 
@@ -82,10 +89,11 @@ with st.sidebar.form(key="sidebar form"):
     submit_button = st.form_submit_button("Submit")
 
 
-st.subheader("First-year sales estimate")
+
 gameNames = ["Clair Obscur: Expedition 33", "The Last of Us Part I", "Detroit: Become Human", "Cyberpunk: 2077", "Hollow Knight", "Celeste", "Resident Evil: Requiem", "Marvel's Spiderman", "Pragmata", "God of War (2018)"]
 
 if(submit_button):
+    st.subheader("First-year sales estimate")
     sales = ml.predict(new_genre, new_release_month, new_marketing_budget, new_team_size, new_platform_count, new_multiplayer, new_is_franchise, new_publisher_size, new_launch_discount)
     formatted_sales = f"{sales:.1f}k"
     # we got a rmse of 0.59
@@ -121,4 +129,24 @@ if(submit_button):
                 unsafe_allow_html=True,
             )
         i += 1
+
+    monthSales = differentMonths(new_genre, new_marketing_budget, new_team_size, new_platform_count, new_multiplayer, new_is_franchise, new_publisher_size, new_launch_discount)
+    months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    print("Month Sales", len(monthSales))
+    monthDf = pd.DataFrame(
+        {"Month": months,
+        "Predicted sales (k)": monthSales}
+    )
+    pd.set_option('display.width', 200)
+    pd.set_option('display.max_colwidth', 90)
+    print(monthDf.round(4).to_string())
+
+    # st.line_chart(monthDf, x="Month", y="Predicted sales (k)")
+    st.subheader("Predicted sales by release month")
+    chart = alt.Chart(monthDf).mark_bar().encode(
+    x=alt.X("Month", sort=None),                     # sort=None keeps your order
+    y=alt.Y("Predicted sales (k)"),
+    )
+
+    st.altair_chart(chart, use_container_width=True)
 

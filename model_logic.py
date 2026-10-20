@@ -34,6 +34,7 @@ sales_k = np.expm1(log_pred)
 
 final_table = df.copy() # get the table
 final_table.drop(columns=finalDrop, inplace=True)
+print(finalDrop)
 
 pd.set_option('display.width', 200)
 pd.set_option('display.max_colwidth', 90)

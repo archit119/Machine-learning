@@ -187,11 +187,13 @@ chosenDrop = [item.strip() for item in chosenDrop] # strips the array of any spa
 print(chosenDrop)
 
 Xfinal = X.drop(columns=chosenDrop)
+finalDrop = fe.invalidColumns + chosenDrop
 
 finalModel = make_pipeline(StandardScaler(), LinearRegression())
 finalModel.fit(Xfinal, y)
 
 dump(finalModel, "game_model_full.joblib")
 dump(Xfinal.columns, "required_inputs.joblib")
+dump(finalDrop, "final_drop.joblib")
 
 print("Model and scaler saved successfully!")

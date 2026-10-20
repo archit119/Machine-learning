@@ -35,7 +35,7 @@ with st.sidebar.form(key="sidebar form"):
     submit_button = st.form_submit_button("Submit")
 
 
-
+st.write("First Year Sales Prediction:")
 
 
 
@@ -46,43 +46,20 @@ import numpy as np
 model = load("game_model_full.joblib")
 columns = list(load("required_inputs.joblib"))
 
-
-new_release_month_sin = np.sin(((new_release_month + 1)/12) * 2 * np.pi)
-new_release_month_cos = np.cos(((new_release_month + 1)/12) * 2 * np.pi)
-
-if(new_is_franchise == 'Yes'): is_franchise = 1
-else: is_franchise = 0
-
-genre_puzzle = 0
-genre_rpg = 0
-genre_shooter = 0,
-genre_strategy = 0
-genre_adventure = 0
-
-if new_genre == 'puzzle':
-    genre_puzzle = 1
-elif new_genre == 'strategy':
-    genre_strategy = 1
-elif new_genre == 'rpg':
-    genre_rpg = 1
-elif new_genre == 'adventure':
-    genre_adventure = 1
-else: genre_shooter = 1
 inputs = {
-    'marketing_budget_usd': new_marketing_budget,
+    'marketing_budget_usd': 500000,
     'team_size': 120,
     'platforms_count': 2,
     'is_multiplayer': 1,
-    'is_franchise': is_franchise,
+    'is_franchise': 0,
     'publisher_size': 2,
     'launch_discount': 0.2,
-    'release_month_sin': new_release_month_sin,
-    'release_month_cos': new_release_month_cos,
-    'genre_puzzle': genre_puzzle,
-    'genre_rpg': genre_rpg,
-    'genre_shooter': genre_shooter,
-    'genre_strategy': genre_strategy,
-    'genre_adventure': genre_adventure
+    'release_month_sin': 0.5,
+    'release_month_cos': 0.866,
+    'genre_puzzle': 0,
+    'genre_rpg': 1,
+    'genre_shooter': 0,
+    'genre_strategy': 0,
 }
 
 X_new = pd.DataFrame([inputs])[columns]         
@@ -91,4 +68,3 @@ sales_k = np.expm1(log_pred)
 
 print(f"Predicted first-year sales: {sales_k:.1f}k")
 
-st.write(f"Predicted first-year sales: {sales_k:.1f} k")

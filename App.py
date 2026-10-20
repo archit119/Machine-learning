@@ -7,7 +7,4 @@ past_games_page = st.Page("past_games.py", title="Past Games")
 
 pg = st.navigation([sales_variation,new_estimation_page, past_games_page],position="top")
 
-
-
-
 pg.run()

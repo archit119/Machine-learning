@@ -1,32 +1,33 @@
 import streamlit as st
-import featureEngineering
-
+import numpy as np
+import model
+import math
 
 side_bar_title = st.sidebar.title("Input")
 with st.sidebar.form(key="sidebar form"):
 
-    genre = st.selectbox(
+    new_genre = st.selectbox(
         
         "Genre",
         ("rpg", "shooter", "adventure","puzzle","strategy")
         
     )
-    release_month = st.slider(
+    new_release_month = st.slider(
         "Release Month",
         0,11
     )
 
 
-    marketing_budget = st.number_input("Marketing Budget")
+    new_marketing_budget = st.number_input("Marketing Budget")
 
-    price = st.number_input("Price at Launch")
+    new_price = st.number_input("Price at Launch")
 
-    dev_time = st.slider(
+    new_dev_time = st.slider(
         "Dev Time in Month",
         0,11
     )
 
-    is_franchise = st.radio(
+    new_is_franchise = st.radio(
         "Is it a franchise",
         [":green[Yes]",":red[No]"]
     )
@@ -36,3 +37,9 @@ with st.sidebar.form(key="sidebar form"):
 
 st.write("First Year Sales Prediction:")
 
+new_release_month_sin = np.sin(((new_release_month + 1)/12) * 2 * np.pi)
+new_release_month_cos= np.cos(((new_release_month + 1 + 1)/12) * 2 * np.pi)
+
+
+
+st.write(model.Xfinal)

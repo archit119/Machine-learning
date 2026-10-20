@@ -64,5 +64,5 @@ st.write("First Year Sales Prediction:")
 
 if(submit_button):
     sales = ml.predict(new_genre, new_release_month, new_marketing_budget, new_team_size, new_platform_count, new_multiplayer, new_is_franchise, new_publisher_size, new_launch_discount)
-    st.write(sales)
+    st.title(f"*{sales:.2f}*")
 

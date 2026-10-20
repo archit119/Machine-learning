@@ -14,7 +14,8 @@ import model_logic as ml
 # launch discount
 
 # ui stuff
-side_bar_title = st.sidebar.title("Input")
+side_bar_title = st.sidebar.title("Game Details")
+st.set_page_config(layout="wide")
 with st.sidebar.form(key="sidebar form"):
 
     new_genre = st.selectbox(
@@ -30,11 +31,11 @@ with st.sidebar.form(key="sidebar form"):
         
     )
 
-    new_marketing_budget = st.number_input("Marketing Budget", step=1)
+    new_marketing_budget = st.number_input("Marketing Budget (USD)", step=1)
 
-    new_team_size = st.number_input("Team size", step=1)
+    new_team_size = st.number_input("Team size", min_value=1, step=1)
 
-    new_platform_count = st.number_input("Platform Count", step=1)
+    new_platform_count = st.number_input("Platform Count", min_value=1, step=1)
 
     new_multiplayer = st.radio(
         "Is it multiplayer?",
@@ -53,16 +54,23 @@ with st.sidebar.form(key="sidebar form"):
 
     )
 
-    new_launch_discount = st.slider(
-        "Launch Discount (%)", 0, 100, 
+    new_launch_discount = st.number_input(
+        "Launch Discount (%)", min_value=0, max_value=100, 
     )
 
     submit_button = st.form_submit_button("Submit")
 
 
-st.write("First Year Sales Prediction:")
+st.subheader("First-year sales estimate")
 
 if(submit_button):
     sales = ml.predict(new_genre, new_release_month, new_marketing_budget, new_team_size, new_platform_count, new_multiplayer, new_is_franchise, new_publisher_size, new_launch_discount)
-    st.write(sales)
+    formatted_sales = f"{sales:.1f}k"
+    # we got a rmse of 0.59
+    # using log conversions you end up with 1.75 value
+    low, high = sales / 1.75, sales * 1.75
+ 
+    c1, c2 = st.columns(2)
+    c1.metric("Predicted first-year sales", f"{sales:.1f}k copies", border=True)
+    c2.metric("Likely range", f"{low:.0f}k – {high:.0f}k", border=True)
 

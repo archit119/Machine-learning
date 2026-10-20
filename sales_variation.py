@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from pandasql import sqldf
 from model_logic import final_table
+import calendar
 
 st.title("Sales Variation")
 st.write("This page allows users to analize and inspect charts based on their chosen input values:")
@@ -40,6 +41,18 @@ month_df = query(f"""
     GROUP BY release_month 
     ORDER BY release_month;
 """)
+month_map = {
+        0: "Jan", 1: "Feb", 2: "Mar", 3:"Apr", 4: "May", 5: "Jun", 
+        6: "Jul", 7: "Aug", 8:"Sept", 9: "Oct", 10: "Nov", 11: "Dec"
+}
+
+month_df["release_month"] = month_df["release_month"].map(month_map)
+# Giving the chronological order
+month_order = list(month_map.values())
+month_df["release_month"] = pd.Categorical(month_df["release_month"], categories=month_order, ordered=True)
+
+# Sort by the new categorical order
+month_df = month_df.sort_values("release_month")
 st.line_chart(month_df, x="release_month", y="avg_sales")
 
 

@@ -188,6 +188,7 @@ print(chosenDrop)
 
 Xfinal = X.drop(columns=chosenDrop)
 finalDrop = fe.invalidColumns + chosenDrop
+finalDrop.append('dev_budget_usd') # we add it manually because technically i dropped it seperately in the script so it never got to save in any list
 
 finalModel = make_pipeline(StandardScaler(), LinearRegression())
 finalModel.fit(Xfinal, y)

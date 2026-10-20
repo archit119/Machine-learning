@@ -196,5 +196,6 @@ finalModel.fit(Xfinal, y)
 dump(finalModel, "game_model_full.joblib")
 dump(Xfinal.columns, "required_inputs.joblib")
 dump(finalDrop, "final_drop.joblib")
+dump(Xfinal, "table_for_dist.joblib")
 
 print("Model and scaler saved successfully!")

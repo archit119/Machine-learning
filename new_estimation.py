@@ -4,6 +4,7 @@ import model_logic as ml
 import pandas as pd
 import random
 import altair as alt
+import model_stats as ms
 
 # stuff needed:
 # genre
@@ -149,4 +150,6 @@ if(submit_button):
     )
 
     st.altair_chart(chart, use_container_width=True)
+
+    ms.displayStats()
 

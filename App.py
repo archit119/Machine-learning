@@ -5,6 +5,6 @@ new_estimation_page = st.Page("new_estimation.py", title="New Estimation")
 past_games_page = st.Page("past_games.py", title="Past Games")
 model_stats = st.Page("model_stats.py", title="Model Stats")
 
-pg = st.navigation([sales_variation,new_estimation_page, past_games_page, model_stats],position="top")
+pg = st.navigation([sales_variation,new_estimation_page, past_games_page],position="top")
 
 pg.run()

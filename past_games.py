@@ -7,29 +7,29 @@ st.title("Past Games")
 
 df = final_table
 
-genre = st.session_state.get("genre", "rpg")
-publisher = st.session_state.get("publisher", "medium")
-score = st.session_state.get("score", 0)
-months = st.session_state.get("months", (0, 11))
+# genre = st.session_state.get("genre", "rpg")
+# publisher = st.session_state.get("publisher", "medium")
+# score = st.session_state.get("score", 0)
+# months = st.session_state.get("months", (0, 11))
 
-filters = f"""
-Where genre = '{genre}'
-    AND publisher_size = '{publisher}'
-    AND release_month BETWEEN {months[0]} AND {months[1]}
-"""
+# filters = f"""
+# Where genre = '{genre}'
+#     AND publisher_size = '{publisher}'
+#     AND release_month BETWEEN {months[0]} AND {months[1]}
+# """
 def run(sql):
     return ps.sqldf(sql, {"df": df})
 
 top10 = run(f"""
 SELECT first_year_sales_k
-FROM df {filters}
+FROM df
 ORDER BY first_year_sales_k DESC
 Limit 10;
 """)
 
 DBSs = run(f"""
 SELECT marketing_budget_usd, first_year_sales_k
-FROM df {filters};
+FROM df;
 """)
 
 if DBSs.empty: 

@@ -84,7 +84,7 @@ with st.sidebar.form(key="sidebar form"):
     )
 
     new_launch_discount = st.number_input(
-        "Launch Discount (%)", min_value=0, max_value=100, 
+        "Launch Discount (%)", min_value=0, max_value=60, 
     )
 
     submit_button = st.form_submit_button("Submit")

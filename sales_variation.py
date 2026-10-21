@@ -39,7 +39,7 @@ month_df = query(f"""
     SELECT release_month, AVG(first_year_sales_k) AS avg_sales 
     FROM final_table
     GROUP BY release_month 
-    ORDER BY release_month;
+    ORDER BY release_month
 """)
 month_map = {
         0: "Jan", 1: "Feb", 2: "Mar", 3:"Apr", 4: "May", 5: "Jun", 

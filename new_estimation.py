@@ -145,11 +145,15 @@ if(submit_button):
     # st.line_chart(monthDf, x="Month", y="Predicted sales (k)")
     st.subheader("Predicted sales by release month")
     chart = alt.Chart(monthDf).mark_bar().encode(
-    x=alt.X("Month", sort=None),                     # sort=None keeps your order
-    y=alt.Y("Predicted sales (k)"),
+        x=alt.X("Month", sort=None),
+        y=alt.Y("Predicted sales (k)"),
+        tooltip=[
+            alt.Tooltip("Month"),
+            alt.Tooltip("Predicted sales (k)", format=".1f"),
+        ],
     )
 
-    st.altair_chart(chart, use_container_width=True)
+    st.altair_chart(chart, width='stretch')
 
     ms.displayStats()
 
